@@ -1,11 +1,15 @@
 #!/usr/bin/env node
 /* eslint-disable no-console */
 
+require('dotenv').config();
 const openurl = require("openurl");
 const yargs = require("yargs");
+const parser = require('http-string-parser');
 
 const localtunnel = require("../localtunnel");
 const { version } = require("../package");
+
+const inspector = require('../Inspector/Inspector');
 
 const { argv } = yargs
   .usage("Usage: lt --port [num] <options> --api-key <api-key>")
@@ -105,6 +109,12 @@ if (argv.apiKey === undefined) {
 
   if (argv.open) {
     openurl.open(tunnel.url);
+  }
+
+  if (!argv.inspect) {
+    tunnel.on('inspector:data', (data) => {
+      inspector.eventEmitter.emit('inspector:data', data);
+    })
   }
 
   if (argv["print-requests"]) {
